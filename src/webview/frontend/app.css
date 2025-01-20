@@ -1,0 +1,190 @@
+* {
+    user-select: none;
+    cursor: default !important;
+    box-sizing: border-box;
+}
+
+.row {
+    display: inline;
+}
+
+.url-input-box {
+    margin-bottom: 10px;
+    display: block;
+    width: 100%;
+}
+
+.url-input-box:hover {
+    cursor: text !important;
+}
+
+.help-text:hover {
+    text-decoration: underline;
+    cursor: help !important;
+}
+
+.case-title {
+    font-weight: bolder;
+    font-size: 14px;
+    color: rgb(215, 212, 24);
+}
+
+.case-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.case-header:hover {
+    filter: brightness(125%);
+}
+
+.case-buttons {
+    display: flex;
+    gap: 4px;
+}
+
+.input {
+    display: flex;
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+
+.expected-output {
+    display: flex;
+    margin-bottom: 5px;
+}
+
+.case-running-text {
+    color: rgb(15, 124, 202)
+}
+
+.case-passed-text {
+    color: lightgreen
+}
+
+.case-failed-text {
+    color: red
+}
+
+.case-timout-text {
+    color: rgb(198, 194, 194)
+}
+
+.case-textarea {
+    background: rgba(0, 0, 0, 0.1);
+    color: white;
+    font-size: 12px;
+    font-family: Consolas, 'Ubuntu Mono', monospace;
+    line-height: 1.2;
+    border: 1px solid white;
+    border-radius: 4px;
+    padding: 8px;
+    display: block;
+    width: 100%;
+    min-height: 20px;
+    max-height: 200px;
+    overflow-y: auto;
+    resize: none;       
+    margin-bottom: 20px;
+    cursor: text !important;
+}
+
+.case-textarea:focus {
+    border-color: #4a90e2;
+    outline: none;
+}
+.case-textarea:hover {
+    background: black;
+}
+
+.problem-name {
+    font-size: 18px;
+    margin: 5px;
+    padding: 10px;
+    font-weight: bold;
+}
+
+.w48 {
+    width: 48%;
+}
+
+.action-buttons {
+    position: fixed;
+    bottom: 0px;
+    left: 0px;
+    width: 100%;
+    padding: 15px;
+    background: var(--vscode-menu-background);
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.button-row {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+}
+
+.file-info {
+    margin-bottom: 10px;
+}
+
+.btn {
+    padding: 2px 5px 2px 5px;
+    background: #2fadf5a7;
+    color: white;
+    outline: none;
+    margin-right: 4px;
+    margin-bottom: 5px;
+    text-align: center;
+    vertical-align: middle;
+    border: 2px solid transparent;
+    border-radius: 4px;
+}
+
+.btn-block {
+    display: block;
+    width: 100%;
+}
+
+.btn-green {
+    background: #8ae33291;
+}
+
+.btn-red {
+    background: #eb244c91;
+}
+
+.btn-orange {
+    background: #fd7e14;
+}
+
+.btn-circle {
+    border-radius: 50%;
+}
+
+.btn:disabled {
+    background: #4a4a4a;
+    color: #8c8c8c;
+    cursor: not-allowed !important;
+}
+
+.btn:focus {
+    border-color: var(--vscode-focusBorder);
+}
+
+#app {
+    margin-bottom: 100px;
+}
+
+.btn:hover {
+    filter: brightness(125%);
+}
+
+.icon,
+.codicon {
+    vertical-align: middle;
+    font-size: 80%;
+}
