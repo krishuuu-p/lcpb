@@ -1,8 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { TestCaseResult } from '../../types';
+import { TestCaseResult, Problem, WebviewToVSEvent, RunResult } from '../../types';
+
+declare const vscodeApi: {
+    postMessage: (message: WebviewToVSEvent) => void;
+};
 
 export function TestCaseView(props: { 
     key: string;
+    problem: Problem;
     tcResult: TestCaseResult; 
     num: number; 
     handleSingleRun: (id: string, input: string, output: string) => void; 
@@ -73,6 +78,28 @@ export function TestCaseView(props: {
 
     const handleSingleDelete = () => {
         props.handleSingleDelete(props.tcResult.id);
+    }
+
+    const handleCopyStdin = () => {
+        vscodeApi.postMessage({
+            command: 'copy-stdin',
+            paramInputMap: tcResult.testcase.paramInputMap,
+            problem: props.problem,
+        });
+    }
+    const handleCopyDriverCode = () => {
+        vscodeApi.postMessage({
+            command: 'copy-driver-code',
+            paramInputMap: tcResult.testcase.paramInputMap,
+            problem: props.problem,
+        });
+    }
+
+    const handleCopyInput = () => {
+        vscodeApi.postMessage({
+            command: 'copy-input',
+            input: inputValue,
+        });
     }
 
     const toggleMinimizedState = () => {
@@ -146,6 +173,39 @@ export function TestCaseView(props: {
                 </div>
             </div>
             {!isMinimized && (
+            <>
+                <div className = 'copy-buttons'>
+                    <div
+                        className="btn btn-blue"
+                        title="Copy generated input for this testcase to clipboard"
+                        onClick={handleCopyInput}
+                    >
+                        <span className="icon">
+                            <i className="codicon codicon-copy"></i>
+                        </span>{' '}
+                        Copy Input
+                    </div>
+                    <div
+                        className="btn btn-blue"
+                        title="Copy generated input for this testcase to clipboard"
+                        onClick={handleCopyStdin}
+                    >
+                        <span className="icon">
+                            <i className="codicon codicon-copy"></i>
+                        </span>{' '}
+                        Copy Stdin
+                    </div>
+                    <div
+                        className="btn btn-blue"
+                        title="Copy generated driver code for this testcase to clipboard"
+                        onClick={handleCopyDriverCode}
+                    >
+                        <span className="icon">
+                            <i className="codicon codicon-copy"></i>
+                        </span>{' '}
+                        Copy Driver Code
+                    </div>
+                </div>
                 <div className = "case-data">
                     <div className="row">
                         <div>
@@ -188,6 +248,7 @@ export function TestCaseView(props: {
                         </div>
                     )}
                 </div>
+            </>
             )}
         </>
     );

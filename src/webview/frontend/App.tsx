@@ -9,8 +9,7 @@ import {
     VSToWebViewMessage,
 } from '../../types';
 import { TestCaseView } from './TestCaseView';
-import { v4 as uuidv4 } from 'uuid'; 
-import { isNumber } from 'util';
+import { v4 as uuidv4 } from 'uuid';
 
 declare const vscodeApi: {
     postMessage: (message: WebviewToVSEvent) => void;
@@ -31,6 +30,7 @@ function Judge(props: {
     const [showFileOptions, setShowFileOptions] = useState<boolean>(false);
     const [inputFile, setInputFile] = useState<string | null>(null);
     const [outputFile, setOutputFile] = useState<string | null>(null);
+    const [isMinimized, setIsMinimized] = useState(true);
 
     const handleFileSelection = (type: 'input' | 'output') => {
         vscodeApi.postMessage({
@@ -85,9 +85,51 @@ function Judge(props: {
             console.error('Testcase not found');
             return;
         }
+        const paramInputMap: Record<string, string> = problem.tests[index].paramInputMap;
+        const inputLines = input.split('\n');
+        for (const line of inputLines) {
+            if (line.trim().length === 0) {
+                continue;
+            }
+
+            // In case if user is writing their own stdin we don't want to throw an error
+            if (!line.includes(':')) {
+                continue;
+            }
+            const [paramName, value] = line.split(':').map((x) => x.trim());
+            if (paramName in paramInputMap) {
+                paramInputMap[paramName] = value;
+            }
+            else {
+                const updatedTCResults = [...tcResults];
+                const testResult: TestResult = {
+                    id,
+                    passed: false,
+                    stdout: 'Parameter not found',
+                    stderr: '',
+                    code: null,
+                    signal: null,
+                    timeout: false,
+                };
+                updatedTCResults[index] = {
+                    ...updatedTCResults[index],
+                    result: testResult,
+                };
+
+                updateResults(updatedTCResults);
+                console.error('Parameter not found:', paramName);
+                vscodeApi.postMessage({
+                    command: 'error-from-webview',
+                    message: `Corresponding parameter not found in the function: '${paramName}' (TestCase ${index + 1}).`,
+                });
+
+                return;
+            }
+        }
 
         problem.tests[index].input = input;
         problem.tests[index].output = output;
+        problem.tests[index].paramInputMap = paramInputMap;
 
         vscodeApi.postMessage({
             command: 'run-single-testcase',
@@ -102,12 +144,22 @@ function Judge(props: {
 
     const handleNewTestCase = () => {
         const id = uuidv4();
+        let input = '';
+        for (const param of problem.parameters) {
+            input += `${param.paramName}: \n`;
+        }
+
+        let paramInputMap: Record<string, string> = {};
+        for (const param of problem.parameters) {
+            paramInputMap[param.paramName] = '';
+        }
         const newtcResult : TestCaseResult = {
             id,
             result: null,
             testcase: {
-                input: '',
+                input,
                 output: '',
+                paramInputMap,
                 id,
             }
         }
@@ -120,6 +172,7 @@ function Judge(props: {
             command: 'new-testcase-from-file',
             inputFile,
             outputFile,
+            problem,
         });
     }
 
@@ -141,6 +194,7 @@ function Judge(props: {
     const tcViews: JSX.Element[] = tcResults.map((tcResult, index) => (
         <TestCaseView
             key={tcResult.id}
+            problem={problem}
             tcResult={tcResult}
             num={index + 1}
             handleSingleRun={handleSingleRun}
@@ -149,11 +203,45 @@ function Judge(props: {
         />
     ));
 
+    const toggleMinimizedState = () => {
+        setIsMinimized(!isMinimized);
+    }
+
     return (
         <div style={{ margin: '10px' }}>
             <div className="problem-name">
                 <span>{props.problem.name}</span>
             </div>
+            <div className="problem-description-title" 
+                onClick={toggleMinimizedState}
+                title = {isMinimized ? 'Expand Problem Description' : 'Minimize Problem Description'}
+            >
+                {isMinimized && (
+                    <span 
+                        className = "icon"
+                        onClick={() => setIsMinimized(false)}
+                    >
+                        <i className='codicon codicon-chevron-right'></i>
+                    </span>
+                )}
+                {!isMinimized && (
+                    <span 
+                        className = "icon"
+                        onClick={() => setIsMinimized(true)}
+                    >
+                        <i className='codicon codicon-chevron-down'></i>
+                    </span> 
+                )}
+
+                <span>Problem Description</span>
+            </div>
+            {!isMinimized && (
+                <div className = "problem-description-container">
+                    <span
+                    dangerouslySetInnerHTML={{ __html: problem.description }}
+                    />
+                </div>
+            )}
             <div className='btn btn-block'
                 title='Get TestCase from a local file'
                 onClick={() => setShowFileOptions(!showFileOptions)}
@@ -349,6 +437,15 @@ function App() {
         return (
             <>
                 <div>
+                    <div className='welcome-text'>
+                        <h1>Welcome to LeetCode Problem Buddy</h1>
+                        <p>
+                            This extension helps you to fetch LeetCode problems and run test cases on them.
+                        </p>
+                        <p>
+                            Choose an action from below to get started.
+                        </p>
+                    </div>
                     <div 
                         className='btn btn-block btn-green help-text'
                         title= "How to use this extension"
@@ -431,6 +528,5 @@ function App() {
     }
 }
 
-// Render the App
 const root = createRoot(document.getElementById('app')!);
 root.render(<App />);

@@ -3,6 +3,8 @@ import { getLeetcodeProblem } from './processLCUrl';
 import { VSToWebViewMessage, WebviewToVSEvent } from './types';
 import { runSingleTestcase } from './execution';
 import { getTestCaseFromFile } from './processIOFiles';
+import { fillCode, inputToStdin } from './parseCode';
+import * as fs from 'fs';
 
 let viewProvider: ViewProvider;
 
@@ -64,7 +66,43 @@ class ViewProvider implements vscode.WebviewViewProvider {
                     }
 
                     case 'new-testcase-from-file': {
-                        getTestCaseFromFile(message.inputFile, message.outputFile);
+                        getTestCaseFromFile(message.inputFile, message.outputFile, message.problem);
+                        break;
+                    }
+
+                    case 'error-from-webview': {
+                        vscode.window.showErrorMessage(message.message);
+                        break;
+                    }
+
+                    case 'copy-stdin': {
+                        const stdin = inputToStdin(message.paramInputMap, message.problem);
+                        if (stdin) {
+                            vscode.env.clipboard.writeText(stdin);
+                            vscode.window.showInformationMessage('Copied stdin to clipboard');
+                        }
+                        break;
+                    }
+
+                    case 'copy-driver-code': {
+                        const problem = message.problem;
+                        const code = fs.readFileSync(problem.srcPath, "utf-8");
+                        const stdin = inputToStdin(message.paramInputMap, message.problem);
+                        if (stdin) {
+                            const driverCode = fillCode(code, problem, message.paramInputMap);
+                            vscode.env.clipboard.writeText(driverCode);
+                            vscode.window.showInformationMessage('Copied driver code to clipboard');
+                        }
+                        else {
+                            vscode.window.showErrorMessage("Couldn't generate driver code.");
+                        }
+                        
+                        break;
+                    }
+
+                    case 'copy-input': {
+                        vscode.env.clipboard.writeText(message.input);
+                        vscode.window.showInformationMessage('Copied input to clipboard');
                         break;
                     }
 
@@ -120,12 +158,12 @@ class ViewProvider implements vscode.WebviewViewProvider {
 }
 
 export function activate(context: vscode.ExtensionContext) {
-	console.log('Congratulations, your extension "lcpf" is now active!');
+	console.log('Congratulations, your extension "lcpb" is now active!');
 
-	console.log('Registering WebviewViewProvider for lcpf.webviewView');
+	console.log('Registering WebviewViewProvider for lcpb.webviewView');
     viewProvider = new ViewProvider(context.extensionUri);
     context.subscriptions.push(
-        vscode.window.registerWebviewViewProvider('lcpf.webviewView', viewProvider,
+        vscode.window.registerWebviewViewProvider('lcpb.webviewView', viewProvider,
             {
                 webviewOptions: {
                     retainContextWhenHidden: true,

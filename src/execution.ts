@@ -5,38 +5,31 @@ import * as vscode from "vscode";
 import { getViewProvider } from "./extension";
 import kill from "tree-kill";
 import { spawn } from "child_process";
-import { fillCode } from "./parseCode";
+import { fillCode, inputToStdin } from "./parseCode";
 import { getPreferenceFor } from "./utilities";
 
-const outputChannel = vscode.window.createOutputChannel("Code Execution");
+const outputChannel = vscode.window.createOutputChannel("LCPB Code Execution");
 
-const getSingleRunResult = async (input: string, problem: Problem): Promise<RunResult> => {
-    const code = fs.readFileSync(problem.srcPath, "utf-8");
-    const inputLines = input.trim().split("\n");
-
-    if (problem.language === 'cpp') {
-        for (let i = 0; i < inputLines.length; i++) {
-            if (inputLines[i]=== '[') {
-                i++;
-                if (inputLines.slice(i).findIndex((line) => line === ']') === -1){
-                    throw new Error("Invalid input format");
-                }
-                while (i < inputLines.length && inputLines[i] !== ']') {
-                    inputLines[i] = `${inputLines[i].split(' ').length} ` + inputLines[i];
-                    i++;
-                }
-            }
+function deleteTempCodeFile(tempSrcPath: string) {
+    if (fs.existsSync(tempSrcPath)) {
+        try {
+            fs.unlinkSync(tempSrcPath);
+        } catch (err) {
+            console.error("Failed to delete temporary source file:", err);
         }
     }
+}
+
+const getSingleRunResult = async (input: string, paramInputMap: Record<string,string>, problem: Problem): Promise<RunResult> => {
+    const code = fs.readFileSync(problem.srcPath, "utf-8");
 
     const ext = problem.srcPath.split('.').pop() || '';
     const tempSrcPath = path.join(path.dirname(problem.srcPath), `tempCodeFile_${Date.now()}.${ext}`);
 
-    const newCode = fillCode(code, inputLines, problem);
+    const newCode = fillCode(code, problem, paramInputMap);
     try {
         fs.writeFileSync(tempSrcPath, newCode);
 
-        input = inputLines.filter((line) => line !== '[' && line !== ']').join("\n");
         let command: string;
         let executablePath: string | null = null;
 
@@ -122,8 +115,6 @@ const getSingleRunResult = async (input: string, problem: Problem): Promise<RunR
                         return;
                     }
         
-                    console.log("Compilation successful.");
-        
                     const runProcess = spawn(executablePath as string, { shell: true });
                     childProcessPid = runProcess.pid;
         
@@ -201,16 +192,6 @@ const getSingleRunResult = async (input: string, problem: Problem): Promise<RunR
     }
 };
 
-function deleteTempCodeFile(tempSrcPath: string) {
-    if (fs.existsSync(tempSrcPath)) {
-        try {
-            fs.unlinkSync(tempSrcPath);
-        } catch (err) {
-            console.error("Failed to delete temporary source file:", err);
-        }
-    }
-}
-
 function verifyOutput(recOutput: string, expOutput: string, returnType: string): boolean {
     const recLines = recOutput.trim().split('\n');
     const expLines = expOutput.trim().split('\n');
@@ -237,45 +218,66 @@ function verifyOutput(recOutput: string, expOutput: string, returnType: string):
 export const runSingleTestcase = async (problem: Problem, id: string) => {
     console.log("Running testcase", id);
 
-    const index = problem.tests.findIndex((tc) => tc.id === id);
-    if (index === -1) {
-        vscode.window.showErrorMessage("Testcase not found.");
+    try {
+        const index = problem.tests.findIndex((tc) => tc.id === id);
+        if (index === -1) {
+            throw new Error('Testcase not found');
+        }
+
+        const testcase = problem.tests[index];
+        const stdin = inputToStdin(testcase.paramInputMap, problem);
+        let input = testcase.input;
+        if (stdin) {
+            input = stdin;
+        }
+        const expOutput = testcase.output;
+
+        let runResult: RunResult = {
+            stdout: '',
+            stderr: '',
+            code: null,
+            signal: null,
+            timeout: false,
+        };
+
+        runResult = await getSingleRunResult(input, testcase.paramInputMap, problem);
+
+        const recOutput = runResult.stdout;
+        const stderr = runResult.stderr;
+        let passed: boolean;
+
+        const errorOccurred =
+            input === null || stderr !== '' || (runResult.code !== null && runResult.code !== 0) || runResult.signal !== null || runResult.timeout;
+
+        if (errorOccurred) {
+            passed = false;
+        } else {
+            passed = verifyOutput(recOutput, expOutput, problem.returnType);
+        }
+
+        if (stderr !== '') {
+            outputChannel.clear();
+            outputChannel.appendLine(`Error: ${stderr}`);
+            outputChannel.show();
+        }
+
+        const testResult: TestResult = {
+            ...runResult,
+            passed,
+            id,
+        };
+
+        getViewProvider().postMessageToWebview({
+            command: 'update-test-case-results',
+            problem,
+            testResult,
+        });
     }
-
-    const testcase = problem.tests[index];
-    const input = testcase.input;
-    const expOutput = testcase.output;
-
-    const runResult = await getSingleRunResult(input, problem);
-
-    const recOutput = runResult.stdout;
-    const stderr = runResult.stderr;
-    let passed: boolean;
-
-    const errorOccurred =
-        stderr !== '' || (runResult.code !== null && runResult.code !== 0) || runResult.signal !== null || runResult.timeout;
-
-    if (errorOccurred) {
-        passed = false;
-    } else {
-        passed = verifyOutput(recOutput, expOutput, problem.returnType);
+    catch (err) {
+        if (err instanceof Error) {
+            vscode.window.showErrorMessage(err.message);
+        } else {
+            vscode.window.showErrorMessage(String(err));
+        }
     }
-
-    if (stderr !== '') {
-        outputChannel.clear();
-        outputChannel.appendLine(`Error: ${stderr}`);
-        outputChannel.show();
-    }
-
-    const testResult: TestResult = {
-        ...runResult,
-        passed,
-        id,
-    };
-
-    getViewProvider().postMessageToWebview({
-        command: 'update-test-case-results',
-        problem,
-        testResult,
-    });
 };

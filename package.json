@@ -1,6 +1,6 @@
 {
-  "name": "lcpf",
-  "displayName": "LeetCode Problem Fetcher",
+  "name": "lcpb",
+  "displayName": "LeetCode Problem Buddy",
   "description": "Fetches problem details from leetcode.",
   "version": "0.0.1",
   "engines": {
@@ -16,66 +16,66 @@
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "lcpf-sidebar-view",
-          "title": "LCPF",
+          "id": "lcpb-sidebar-view",
+          "title": "LCPB",
           "icon": "$(code)"
         }
       ]
     },
     "views": {
-      "lcpf-sidebar-view": [
+      "lcpb-sidebar-view": [
         {
-          "id": "lcpf.webviewView",
+          "id": "lcpb.webviewView",
           "name": "Get Problem",
           "type": "webview"
         }
       ]
     },
 	"configuration": {
-		"title": "LeetCode Problem Fetcher",
+		"title": "LeetCode Problem Buddy",
 		"properties": {
-			"lcpf.general.saveTestCases": {
+			"lcpb.general.saveTestCases": {
 				"title": "Save fetched testcases",
 				"type": "boolean",
 				"default": true,
 				"description": "Save fetched testcases to a file."
 			},
-			"lcpf.general.saveLocation": {
+			"lcpb.general.saveLocation": {
 				"title": "Path of the directory in which you want to save the fetched testcases",
 				"type": "string",
 				"default": "",
-				"description": "Location where you want to save your files. Example '/home/user/leetcode'\nThis is used only if 'Save fetched testcases' is enabled.\n(default: working_directory\\.lcpf)"
+				"description": "Location where you want to save your files. Example '/home/user/leetcode'\nThis is used only if 'Save fetched testcases' is enabled.\n(default: working_directory\\.lcpb)"
 			},
-      "lcpf.general.templateFileLocationCpp": {
+      "lcpb.general.templateFileLocationCpp": {
         "title": "Path of the C++ template file for leetcode problems",
         "type": "string",
         "default": "",
         "description": "Location of the template file.\nWarning: This will be added on top of the classes predefined by the LeetCode Problem which is being fetched. Exclude main function from the template or you may get compilation error.\nExample '/home/user/template.cpp'"
       },
-      "lcpf.general.templateFileLocationPython": {
+      "lcpb.general.templateFileLocationPython": {
         "title": "Path of the python template file for leetcode problems",
         "type": "string",
         "default": "",
         "description": "Location of the template file.\nWarning: This will be added on top of the classes predefined by the LeetCode Problem which is being fetched.\nExample '/home/user/template.py'"
       },
-			"lcpf.language.cpp.Args": {
+			"lcpb.language.cpp.Args": {
 				"title": "Compilation flags for C++ files",
 				"type": "string",
 				"default": "",
 				"description": "Space seperated additional flags passed to g++ ( for C++ ) while compiling your file. Example '-Wmaybe-uninitialized -std=c++14'"
 			},
-			"lcpf.language.cpp.Command": {
+			"lcpb.language.cpp.Command": {
 				"type": "string",
 				"default": "g++",
 				"description": "Command used to compile .cpp files. Example 'g++', 'g++-10', 'clang++', etc."
 			},
-			"lcpf.language.python.Args": {
+			"lcpb.language.python.Args": {
 				"title": "Compilation flags for Python files",
 				"type": "string",
 				"default": "",
 				"description": "Space seperated additional flags passed to python while compiling your file. Example '-Wignore -u'"
 			},
-			"lcpf.language.python.Command": {
+			"lcpb.language.python.Command": {
 				"type": "string",
 				"default": "python3",
 				"description": "Command used to run python files. Example 'py', 'python3', 'pypy3', etc."

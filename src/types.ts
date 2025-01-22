@@ -1,11 +1,13 @@
 export type TestCase = {
     input: string;
     output: string;
+    paramInputMap: Record<string, string>;
     id: string;
 };
 
 export type Problem = {
     name: string;
+    description: string;
     url: string;
     memoryLimit: number;
     timeLimit: number;
@@ -54,6 +56,7 @@ export type NewTestCaseFromFileCommand= {
     command: 'new-testcase-from-file';
     inputFile: string|null;
     outputFile: string|null;
+    problem: Problem;
 };
 
 export type SelectFileCommand = {
@@ -65,12 +68,38 @@ export type OpenHelpUrlCommand = {
     command: 'open-help-url';
 };
 
+export type ErrorFromWebviewCommand = {
+    command: 'error-from-webview';
+    message: string;
+};
+
+export type CopyStdinCommand = {
+    command: 'copy-stdin';
+    paramInputMap: Record<string, string>;
+    problem: Problem;
+};
+
+export type CopyDriverCodeCommand = {
+    command: 'copy-driver-code';
+    paramInputMap: Record<string, string>;
+    problem: Problem;
+};
+
+export type CopyInputCommand = {
+    command: 'copy-input';
+    input: string;
+};
+
 export type WebviewToVSEvent =
     | FetchLCProblem
     | RunSingleTestcase
     | NewTestCaseFromFileCommand
     | SelectFileCommand
-    | OpenHelpUrlCommand;
+    | OpenHelpUrlCommand
+    | ErrorFromWebviewCommand
+    | CopyStdinCommand
+    | CopyDriverCodeCommand
+    | CopyInputCommand;
 
 export type UpdateProblemCommand = {
     command: 'update-problem';

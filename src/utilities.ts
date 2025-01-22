@@ -1,5 +1,6 @@
 import path from 'path';
 import * as vscode from 'vscode';
+import { Problem } from './types';
 
 const supportedLanguages = ['cpp','py','py3'];
 
@@ -20,5 +21,5 @@ export const checkUnsupported = (srcPath: string): boolean => {
 };
 
 export const getPreferenceFor = (pref : string) : any => {
-    return vscode.workspace.getConfiguration('lcpf').get(pref);
+    return vscode.workspace.getConfiguration('lcpb').get(pref);
 };
