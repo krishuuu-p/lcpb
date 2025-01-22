@@ -2,21 +2,21 @@ const path = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
-  mode: 'development', // Use 'development' or 'production' as needed
-  entry: './src/webview/frontend/App.tsx', // Entry point for your React app
+  mode: 'development',
+  entry: './src/webview/frontend/App.tsx',
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'webview.js', // Output bundle for the webview
+    filename: 'webview.js',
   },
   resolve: {
-    extensions: ['.tsx', '.ts', '.js'], // Support TypeScript, JSX, and JavaScript
+    extensions: ['.tsx', '.ts', '.js'],
   },
   module: {
     rules: [
       {
         test: /\.(ts|tsx)$/,
         exclude: /node_modules/,
-        use: 'ts-loader', // Compile TypeScript and JSX files
+        use: 'ts-loader',
       },
     ],
   },
@@ -39,5 +39,5 @@ module.exports = {
       ],
     }),
   ],
-  devtool: 'inline-source-map', // Source maps for easier debugging
+  devtool: 'inline-source-map',
 };

@@ -190,7 +190,6 @@ const getProblemSlug = (url: string): string | null => {
             throw new Error('Invalid LeetCode problem URL.');
         }
         const problemSlug = parsedUrl.pathname.split('/')[2];
-        console.log('Valid LeetCode Problem URL Detected:', problemSlug);
         return problemSlug;
     } catch (error) {
         console.error('Invalid URL:', error);
@@ -306,10 +305,8 @@ async function handleNewLeetCodeProblem(
         let inputLine = inputMatch[1].trim();
         
         inputLine = format(inputLine, false);
-        // Split the input line into individual key-value pairs
         const params = inputLine.split(',').map(param => param.trim());
 
-        // Create a map to store the parameter names and their corresponding values as strings
         const paramInputMap: Record<string, string> = {};
         let idx = 0;
         params.forEach(param => {

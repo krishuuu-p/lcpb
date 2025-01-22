@@ -158,9 +158,8 @@ class ViewProvider implements vscode.WebviewViewProvider {
 }
 
 export function activate(context: vscode.ExtensionContext) {
-	console.log('Congratulations, your extension "lcpb" is now active!');
+	console.log('LeetCode Problem Buddy is now active!');
 
-	console.log('Registering WebviewViewProvider for lcpb.webviewView');
     viewProvider = new ViewProvider(context.extensionUri);
     context.subscriptions.push(
         vscode.window.registerWebviewViewProvider('lcpb.webviewView', viewProvider,
