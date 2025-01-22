@@ -42,7 +42,7 @@ class ViewProvider implements vscode.WebviewViewProvider {
                     }
 
                     case 'open-help-url': {
-                        vscode.env.openExternal(vscode.Uri.parse('https://google.com'));
+                        vscode.env.openExternal(vscode.Uri.parse('https://github.com/krishuuu-p/lcpb/blob/main/README.md'));
                         break;
                     }
 

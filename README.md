@@ -1,6 +1,6 @@
 # LeetCode Problem Buddy (LCPB) VS Code Extension  
 
-Welcome to the documentation for **LeetCode Problem Buddy (LCPB)**, a VS Code extension designed to simplify the process of testing LeetCode problems on your local machine. This extension allows you to fetch LeetCode problems, test them against the provided test cases or custom test cases, and even add test cases from local text files.  
+Welcome to the documentation for **LeetCode Problem Buddy (LCPB)**, a VS Code extension designed to simplify the process of testing LeetCode problems on your local machine. This extension allows you to fetch LeetCode problems (using the [leetcode-query](https://www.npmjs.com/package/leetcode-query) API), test them against the provided test cases or custom test cases, and even add test cases from local text files.  
 
 All of this is accomplished without the need to manually write driver code! The driver code is automatically generated based on the problem being worked on. However, due to the vast variety of problems on LeetCode and the tight development timeline, not all edge cases could be addressed. Problems with parameters involving pointer data types (excluding `TreeNode`, which is handled consistently) may require you to write the driver code manually.  
 
@@ -39,11 +39,13 @@ To ensure a smooth experience, the following assumptions were made for input for
 6. **Custom Configuration Options**  
    - Configure paths, settings, and compilation commands for each supported language.  
 7. **Save Test Cases**  
-   - Test cases can be saved to files based on user preferences in the settings.  
+   - Test cases can be saved to files based on user preferences in the settings.
+8. **Fetch Template Code**  
+   - Retrieve template files for supported languages directly from user-specified locations, ensuring a personalized and seamless coding experience.
 
 ## Demo  
 
-[Watch the Demo Video Here](https://drive.google.com/file/d/1NM2i0FIthgAaMbyN50YCxxs5KAXHclSQ/view?usp=drive_link)  
+[Watch the Demo Video Here](https://drive.google.com/file/d/1jAQ9RQoMTc3lnyxUQ0WUgEBgMMg5A4CC/view?usp=sharing)  
 
 ## Extension Settings  
 

@@ -177,7 +177,7 @@ export function TestCaseView(props: {
                 <div className = 'copy-buttons'>
                     <div
                         className="btn btn-blue"
-                        title="Copy generated input for this testcase to clipboard"
+                        title="Copy below input to clipboard"
                         onClick={handleCopyInput}
                     >
                         <span className="icon">

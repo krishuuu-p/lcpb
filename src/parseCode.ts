@@ -616,10 +616,11 @@ export function inputToStdin(paramInputMap: Record<string,string>, problem: Prob
         }
 
         for (const [paramName, input] of Object.entries(paramInputMap)) {
-            if (singleType.includes(paramTypeMap[paramName])) {
+            const paramType = paramTypeMap[paramName];
+            if (singleType.includes(paramType)) {
                 stdInput += input + '\n';
-            } else if (arrayType.includes(paramTypeMap[paramName]) || (paramTypeMap[paramName] === 'TreeNode*' && problem.language === 'cpp')  || 
-                ((paramTypeMap[paramName] === 'TreeNode' || 'Optional[TreeNode]') && (problem.language === 'py' || 'py3'))) 
+            } else if (arrayType.includes(paramType) || (paramType === 'TreeNode*' && problem.language === 'cpp')  || 
+                ((paramType === 'TreeNode' || paramType === 'Optional[TreeNode]') && (problem.language === 'py' || problem.language === 'py3'))) 
             {
                 if (input[0] !== '[' || input[input.length-1] !== ']') {
                     throw new Error(`Invalid input format for ${paramName}. Expected ${paramName} in the format [...]`);
@@ -630,7 +631,7 @@ export function inputToStdin(paramInputMap: Record<string,string>, problem: Prob
                 } else {
                     stdInput += arr.length + '\n' + input.slice(1,-1).trim() + '\n';
                 }
-            } else if (array2DType.includes(paramTypeMap[paramName])) {
+            } else if (array2DType.includes(paramType)) {
                 if (!input.startsWith('[[') || !input.endsWith(']]')) {
                     throw new Error(`Invalid input format for ${paramName}. Expected ${paramName} in the format [[][]...]`);
                 }
@@ -640,10 +641,10 @@ export function inputToStdin(paramInputMap: Record<string,string>, problem: Prob
                     const subArrElements = subArr.split(' ').map((x) => x.trim());
                     stdInput += subArrElements.length + '\n' + subArrElements.join(' ') + '\n';
                 }
-            } else if (pointerType.includes(paramTypeMap[paramName]) || pointerArrayType.includes(paramTypeMap[paramName])) {
-                throw new Error(`Pointer type (${paramTypeMap[paramName]} ${paramName}) not supported yet. Consider writing the driver code on your own.`);
+            } else if (pointerType.includes(paramType) || pointerArrayType.includes(paramType)) {
+                throw new Error(`Pointer type (${paramType} ${paramName}) not supported yet. Consider writing the driver code on your own.`);
             } else {
-                throw new Error(`Unsupported type ${paramTypeMap[paramName]} for ${paramName}`);
+                throw new Error(`Unsupported type ${paramType} for ${paramName}`);
             }
         }
 
