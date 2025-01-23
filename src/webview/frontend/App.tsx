@@ -184,6 +184,14 @@ function Judge(props: {
         updateResults([]);
     };
 
+    const handleDeleteProblem = () => {
+        updateProblem(undefined);
+        vscodeApi.postMessage({
+            command: 'delete-problem',
+            srcPath: problem.srcPath,
+        });
+    }
+
     useEffect(() => {
         if (runAllCalled) {
             const timer = setTimeout(() => setRunAllCalled(false), 100);
@@ -336,7 +344,7 @@ function Judge(props: {
                     <button
                         className="btn btn-red w48"
                         title="Delete the problem associated with this file and fetch another problem"
-                        onClick= {() => updateProblem(undefined)}
+                        onClick= {handleDeleteProblem}
                     >
                         <span className="icon">
                             <i className="codicon codicon-trash"></i>
@@ -356,12 +364,46 @@ function App() {
     const [showUrlInput, setShowUrlInput] = useState<boolean>(false);
     const [isFetching, setIsFetching] = useState<boolean>(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [deferSaveTimer, setDeferSaveTimer] = useState<number | null>(null);
+    const [, setSaving] = useState<boolean>(false);
+
+    // Save the problem
+    const save = () => {
+        setSaving(true);
+        if (problem !== undefined) {
+            vscodeApi.postMessage({
+                command: 'save',
+                problem,
+            });
+        }
+        setTimeout(() => {
+            setSaving(false);
+        }, 500);
+    };
+
+    // Save problem if it changes.
+    useEffect(() => {
+        if (deferSaveTimer !== null) {
+            clearTimeout(deferSaveTimer);
+        }
+        const timeOutId = window.setTimeout(() => {
+            setDeferSaveTimer(null);
+            save();
+        }, 500);
+        setDeferSaveTimer(timeOutId);
+    }, [problem]);
+
 
     useEffect(() => {
         const handleMessage = (event: any) => {
             const data: VSToWebViewMessage = event.data;
             console.log("Got from extension:", data.command);
             switch (data.command) {
+                case 'new-problem': {
+                    setProblem(data.problem);
+                    setTCResults(getInitialResultsFromProblem(data.problem));
+                    break;
+                }
                 case 'update-problem': {
                     setProblem(data.problem);
                     setTCResults(getInitialResultsFromProblem(data.problem));

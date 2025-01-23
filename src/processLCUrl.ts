@@ -7,6 +7,7 @@ import * as vscode from 'vscode';
 import { getViewProvider } from './extension';
 import * as fs from 'fs';
 import path from 'path';
+import { saveProblem } from './saveProblem';
 
 interface ProblemDetails {
     [key: string]: any;
@@ -83,14 +84,14 @@ async function askWithTimeout<T>(
     return new Promise<T>((resolve) => {
         const timer = setTimeout(() => resolve(defaultValue), timeoutMs);
         vscode.window.showInformationMessage(question, ...options).then((selection) => {
-            clearTimeout(timer); // Clear the timeout if the user responds in time
+            clearTimeout(timer);
             resolve((selection as T) ?? defaultValue);
         });
     });
 }
 
 async function writeToFiles(problem: Problem) {
-    const prefPath = getPreferenceFor('general.saveLocation');
+    const prefPath = getPreferenceFor('general.testcaseSaveLocation');
     const srcPath = problem.srcPath;
     if (prefPath === '') {
         if (!fs.existsSync(path.join(path.dirname(srcPath),'.lcpb'))) {
@@ -101,17 +102,34 @@ async function writeToFiles(problem: Problem) {
                 console.error('Error creating .lcpb directory:', error);
                 vscode.window.showErrorMessage('An unexpected error occurred while creating the .lcpb directory.');
             }
+
+            try {
+                await fs.promises.mkdir(path.join(path.dirname(srcPath),'.lcpb', 'testcases'));
+            }
+            catch (error) {
+                console.error('Error creating testcases directory:', error);
+                vscode.window.showErrorMessage('An unexpected error occurred while creating the testcases directory within .lcpb folder.');
+            }
+        }
+        else if (!fs.existsSync(path.join(path.dirname(srcPath),'.lcpb', 'testcases'))) {
+            try {
+                await fs.promises.mkdir(path.join(path.dirname(srcPath),'.lcpb', 'testcases'));
+            }
+            catch (error) {
+                console.error('Error creating testcases directory:', error);
+                vscode.window.showErrorMessage('An unexpected error occurred while creating the testcases directory within .lcpb folder.');
+            }
         }
 
         try {
             (problem.tests).forEach((test, index) => {
-                const inputPath = path.join(path.dirname(srcPath),'.lcpb', `input_${index+1}_${problem.name.split(' ').join('_')}.txt`);
-                const outputPath = path.join(path.dirname(srcPath),'.lcpb', `output_${index+1}_${problem.name.split(' ').join('_')}.txt`);
+                const inputPath = path.join(path.dirname(srcPath),'.lcpb', 'testcases', `input_${index+1}_${problem.name.split(' ').join('_')}.txt`);
+                const outputPath = path.join(path.dirname(srcPath),'.lcpb', 'testcases', `output_${index+1}_${problem.name.split(' ').join('_')}.txt`);
                 fs.writeFileSync(inputPath, test.input);
                 fs.writeFileSync(outputPath, test.output);
             });
     
-            vscode.window.showInformationMessage('Input and output files have been written to the .lcpb directory.');
+            vscode.window.showInformationMessage('Input and output files have been written to the .lcpb\\testcases directory.');
         }
         catch (error) {
             console.error('Error writing inputs and outputs to files:', error);
@@ -120,7 +138,7 @@ async function writeToFiles(problem: Problem) {
     }
     else {
         if (!fs.existsSync(prefPath)) {
-            vscode.window.showErrorMessage('The preferred directory for saving fetched testcases does not exist. (Check your settings)');
+            vscode.window.showErrorMessage(`The preferred directory for saving fetched testcases ${prefPath} does not exist. (Check your settings)`);
         }
         else {
             try {
@@ -131,11 +149,11 @@ async function writeToFiles(problem: Problem) {
                     fs.writeFileSync(outputPath, test.output);
                 });
         
-                vscode.window.showInformationMessage('Input and output files have been written to the .lcpb directory.');
+                vscode.window.showInformationMessage(`Input and output files have been written to ${prefPath}.`);
             }
             catch (error) {
                 console.error('Error writing inputs and outputs to files:', error);
-                vscode.window.showErrorMessage('An unexpected error occurred while writing testcases to files.');
+                vscode.window.showErrorMessage(`An unexpected error occurred while writing testcases to ${prefPath}.`);
             }
         }
     }
@@ -390,6 +408,7 @@ export const getLeetcodeProblem = async (
             if (getPreferenceFor('general.saveTestCases')) {
                 writeToFiles(problem);
             }
+            saveProblem(problem.srcPath, problem);
             getViewProvider().postMessageToWebview({
                 command: 'update-problem',
                 problem,

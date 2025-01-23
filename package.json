@@ -40,12 +40,18 @@
 				"default": true,
 				"description": "Save fetched testcases to a file."
 			},
-			"lcpb.general.saveLocation": {
+			"lcpb.general.testcaseSaveLocation": {
 				"title": "Path of the directory in which you want to save the fetched testcases",
 				"type": "string",
 				"default": "",
-				"description": "Location where you want to save your files. Example '/home/user/leetcode'\nThis is used only if 'Save fetched testcases' is enabled.\n(default: working_directory\\.lcpb)"
+				"description": "Location where you want to save your files. Example '/home/user/leetcode'\nThis is used only if 'Save fetched testcases' is enabled.\n(default: working_directory\\.lcpb\\testcases)"
 			},
+      "lcpb.general.problemSaveLocation": {
+        "title": "Path of the directory in which you want to save the fetched problem",
+        "type": "string",
+        "default": "",
+        "description": "LCPB saves problem state in this directory. It helps to restore the webview state on the event that editor is closer or switched. Example '/home/user/lcpb_prb_states'\n(default: working_directory\\.lcpb\\problems)"
+      },
       "lcpb.general.templateFileLocationCpp": {
         "title": "Path of the C++ template file for leetcode problems",
         "type": "string",

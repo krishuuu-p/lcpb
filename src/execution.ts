@@ -7,6 +7,7 @@ import kill from "tree-kill";
 import { spawn } from "child_process";
 import { fillCode, inputToStdin } from "./parseCode";
 import { getPreferenceFor } from "./utilities";
+import { saveProblem } from "./saveProblem";
 
 const outputChannel = vscode.window.createOutputChannel("LCPB Code Execution");
 
@@ -266,6 +267,8 @@ export const runSingleTestcase = async (problem: Problem, id: string) => {
             passed,
             id,
         };
+
+        saveProblem(problem.srcPath, problem);
 
         getViewProvider().postMessageToWebview({
             command: 'update-test-case-results',

@@ -2,7 +2,7 @@
 
 Welcome to the documentation for **LeetCode Problem Buddy (LCPB)**, a VS Code extension designed to simplify the process of testing LeetCode problems on your local machine. This extension allows you to fetch LeetCode problems (using the [leetcode-query](https://www.npmjs.com/package/leetcode-query) API), test them against the provided test cases or custom test cases, and even add test cases from local text files.  
 
-All of this is accomplished without the need to manually write driver code! The driver code is automatically generated based on the problem being worked on. However, due to the vast variety of problems on LeetCode and the tight development timeline, not all edge cases could be addressed. Problems with parameters involving pointer data types (excluding `TreeNode`, which is handled consistently) may require you to write the driver code manually.  
+All of this is accomplished without the need to manually write driver code, as the driver code is automatically generated based on the problem being worked on. While this approach significantly streamlines development, the complexity of LeetCode's diverse problem set and tight development timeline present challenges in comprehensively addressing all edge cases. Specifically, problems involving pointer data types (with the exception of consistently handled `TreeNode`) may necessitate manual driver code implementation, particularly due to the varied definitions of custom types like `Node` or `ListNode`.
 
 ## Key Assumptions  
 
@@ -53,7 +53,8 @@ The following settings can be configured to customize your experience:
 
 - **General Settings**  
   - `lcpb.general.saveTestCases`: Enable or disable saving fetched test cases to a file.  
-  - `lcpb.general.saveLocation`: Specify the directory where test case files will be saved.  
+  - `lcpb.general.testcaseSaveLocation`: Specify the directory where test case files will be saved.
+  - `lcpb.general.problemSaveLocation`: Specify the directory where problems will be saved in JSON format.  
 
 - **Language-Specific Settings**  
   - C++:  
@@ -64,10 +65,6 @@ The following settings can be configured to customize your experience:
     - `lcpb.general.templateFileLocationPython`: Path to the Python template file for LeetCode problems.  
     - `lcpb.language.python.Args`: Compilation flags for Python files.  
     - `lcpb.language.python.Command`: Command used to execute Python files (e.g., `python3`, `pypy3`).  
-
-## Known Issues  
-
-- Webview state is not retained if the editor is closed or switched.  
 
 ## Release Notes  
 

@@ -5,6 +5,9 @@ import { runSingleTestcase } from './execution';
 import { getTestCaseFromFile } from './processIOFiles';
 import { fillCode, inputToStdin } from './parseCode';
 import * as fs from 'fs';
+import { saveProblem } from './saveProblem';
+import { checkLaunchWebview, editorChanged, editorClosed } from './handleEditorChanges';
+import { deleteProblemFile } from './utilities';
 
 let viewProvider: ViewProvider;
 
@@ -106,6 +109,16 @@ class ViewProvider implements vscode.WebviewViewProvider {
                         break;
                     }
 
+                    case 'save': {
+                        saveProblem(message.problem.srcPath, message.problem);
+                        break;
+                    }
+
+                    case 'delete-problem': {
+                        deleteProblemFile(message.srcPath);
+                        break;
+                    }
+
                     default: {
                         console.error(
                             'Unknown event received from webview',
@@ -128,8 +141,17 @@ class ViewProvider implements vscode.WebviewViewProvider {
 	public postMessageToWebview = async (message: VSToWebViewMessage) => {
         if (this._view && this._view.visible) {
             this._view.webview.postMessage(message);
+            if (message.command === 'new-problem') {
+                if (message.problem === undefined) {
+                    this.problemPath = undefined;
+                } else {
+                    this.problemPath = message.problem.srcPath;
+                }
+            }
         }
     };
+
+    public problemPath: string | undefined;
 
     private _getHtmlForWebview(webview: vscode.Webview): string {
         const styleUri = webview.asWebviewUri(vscode.Uri.joinPath(this.extensionUri, 'dist','app.css'));
@@ -170,6 +192,25 @@ export function activate(context: vscode.ExtensionContext) {
             },
         )
     );
+
+    checkLaunchWebview();
+
+    vscode.workspace.onDidCloseTextDocument((e) => {
+        editorClosed(e);
+    });
+
+    vscode.window.onDidChangeActiveTextEditor((e) => {
+        editorChanged(e);
+    });
+
+    vscode.window.onDidChangeVisibleTextEditors((editors) => {
+        if (editors.length === 0) {
+            getViewProvider().postMessageToWebview({
+                command: 'new-problem',
+                problem: undefined,
+            });
+        }
+    });
 }
 
 export function deactivate() { }

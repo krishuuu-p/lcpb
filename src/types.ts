@@ -90,6 +90,16 @@ export type CopyInputCommand = {
     input: string;
 };
 
+export type SaveCommand = {
+    command: 'save';
+    problem: Problem;
+};
+
+export type DeleteProblemCommand = {
+    command: 'delete-problem';
+    srcPath: string;
+};
+
 export type WebviewToVSEvent =
     | FetchLCProblem
     | RunSingleTestcase
@@ -99,7 +109,9 @@ export type WebviewToVSEvent =
     | ErrorFromWebviewCommand
     | CopyStdinCommand
     | CopyDriverCodeCommand
-    | CopyInputCommand;
+    | CopyInputCommand
+    | SaveCommand
+    | DeleteProblemCommand;
 
 export type UpdateProblemCommand = {
     command: 'update-problem';
@@ -128,9 +140,15 @@ export type UpdateFileTestCaseCommand = {
     tcResult: TestCaseResult;
 };
 
+export type NewProblemCommand = {
+    command: 'new-problem';
+    problem: Problem | undefined;
+};
+
 export type VSToWebViewMessage =
     | UpdateProblemCommand
     | ErrorFromExtensionCommand
     | UpdateTestCaseResultsCommand
     | FileSelectedCommand
-    | UpdateFileTestCaseCommand;
+    | UpdateFileTestCaseCommand
+    | NewProblemCommand;
