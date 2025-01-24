@@ -36,12 +36,14 @@ export const saveProblem = (srcPath: string, problem: Problem) => {
     const srcFolder = path.dirname(srcPath);
     const lcpbFolder = path.join(srcFolder, '.lcpb');
 
-    if (getPreferenceFor('general.problemSaveLocation') === '' && !fs.existsSync(lcpbFolder)) {
-        fs.mkdirSync(lcpbFolder);
-        fs.mkdirSync(path.join(lcpbFolder, 'problems'));
-    }
-    else if (getPreferenceFor('general.problemSaveLocation') === '' && !fs.existsSync(path.join(lcpbFolder, 'problems'))) {
-        fs.mkdirSync(path.join(lcpbFolder, 'problems'));
+    if (getPreferenceFor('general.problemSaveLocation') === '') {
+        if (!fs.existsSync(lcpbFolder)) {
+            fs.mkdirSync(lcpbFolder);
+            fs.mkdirSync(path.join(lcpbFolder, 'problems'));
+        }
+        else if (!fs.existsSync(path.join(lcpbFolder, 'problems'))) {
+            fs.mkdirSync(path.join(lcpbFolder, 'problems'));
+        }
     }
     const probPath = getProbSaveLocation(srcPath);
     try {

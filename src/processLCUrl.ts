@@ -218,9 +218,9 @@ const getProblemSlug = (url: string): string | null => {
 async function handleNewLeetCodeProblem(
     probDetails: ProblemDetails,
     urlInput: string,
-): Promise<Problem | undefined> {
+): Promise<{problem: Problem|undefined, code: string|null}> {
     if (!probDetails) {
-        return undefined;
+        return {problem: undefined, code: null};
     }
 
     const editor = vscode.window.activeTextEditor;
@@ -230,7 +230,7 @@ async function handleNewLeetCodeProblem(
             command: 'error-from-extension',
             message: 'An unexpected error occurred.',
         });
-        return undefined;
+        return {problem: undefined, code: null};
     }
 
     const srcPath = editor.document.fileName;
@@ -239,7 +239,7 @@ async function handleNewLeetCodeProblem(
             command: 'error-from-extension',
             message: 'This file type is not supported.',
         });
-        return undefined;
+        return {problem: undefined, code: null};
     }
 
     const extensionToIndexMap = new Map<string, number>([
@@ -257,7 +257,7 @@ async function handleNewLeetCodeProblem(
             command: 'error-from-extension',
             message: 'This language is not supported by LeetCode.',
         });
-        return undefined;
+        return {problem: undefined, code: null};
     }
 
     // Handle Python-specific language selection
@@ -265,31 +265,19 @@ async function handleNewLeetCodeProblem(
     if (extension === 'py') {
         const pythonVersion = await askWithTimeout(
             'Select version of Python:',
-            10000,
+            20000,
             'Python',
             'Python',
             'Python3'
         );
         language = pythonVersion === 'Python3' ? 'py3' : 'py';
         index = language === 'py3' ? 3 : 2;
-    }
+     }
 
     // Parse the code to extract return type and parameters
     const code = probDetails.codeSnippets[index].code;
     const result = parseCode(code, language);
-
-    // Ask the user whether to write the parsed code to the file
-    const writeCode = await askWithTimeout(
-        'LCPB: Do you want to clear the current file content and replace it with the fetched code?',
-        10000,
-        'No',
-        'Yes',
-        'No'
-    );
-
-    if (writeCode === 'Yes') {
-        fs.writeFileSync(srcPath, result.code);
-    }
+    const codeToWrite = result.code;
 
     let description: string = probDetails.content;
 
@@ -361,20 +349,20 @@ async function handleNewLeetCodeProblem(
 
     problem.tests = testCases;
     console.log('Problem:', problem);
-    return problem;
+    return {problem, code: codeToWrite};
 }
 
 async function getProblemFromSlug(
     problemSlug: string,
     urlInput: string,
-): Promise<Problem | undefined> {
+): Promise<{problem: Problem|undefined, code: string|null}> {
     const probDetails = await getAllProblemDetails(problemSlug);
     if (!probDetails) {
-        return undefined;
+        return {problem: undefined, code: null};
     }
-    let problem = await handleNewLeetCodeProblem(probDetails, urlInput);
+    let {problem, code} = await handleNewLeetCodeProblem(probDetails, urlInput);
 
-    return problem;
+    return {problem, code};
 }
 
 // Fetch and return LeetCode problem details
@@ -383,14 +371,18 @@ export const getLeetcodeProblem = async (
 ): Promise<Problem | undefined> => {
     let errorMessage: string = '';
     let problem: Problem | undefined = undefined;
+    let code: string | null = null;
     const problemSlug = getProblemSlug(url);
+
     if (!problemSlug) {
         console.error('Cannot fetch LeetCode Problem. Invalid URL.');
         errorMessage =
             'Invalid URL. Please provide a valid LeetCode problem URL.';
     } else {
         try {
-            problem = await getProblemFromSlug(problemSlug, url);
+            const result = await getProblemFromSlug(problemSlug, url);
+            problem = result.problem;
+            code = result.code;
         } catch (error) {
             console.error('Error fetching Leetcode Problem:', error);
             errorMessage =
@@ -413,6 +405,20 @@ export const getLeetcodeProblem = async (
                 command: 'update-problem',
                 problem,
             });
+            
+            if (code) {
+                const writeCode = await askWithTimeout(
+                    'LCPB: Do you want to clear the current file content and replace it with the fetched code?',
+                    20000,
+                    'No',
+                    'Yes',
+                    'No'
+                );
+
+                if (writeCode === 'Yes') {
+                    fs.writeFileSync(problem.srcPath, code);
+                }
+            }
         }
     }
 
