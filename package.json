@@ -4,13 +4,17 @@
   "description": "Fetches problem details from leetcode.",
   "version": "0.0.1",
   "icon": "assets/icon.png",
-  "publisher": "Krishna Pahariya",
+  "publisher": "leetcode-problem-buddy",
   "galleryBanner": {
     "color": "#21214c",
     "theme": "dark"
   },
   "engines": {
     "vscode": "^1.96.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/krishuuu-p/lcpb.git"
   },
   "categories": [
     "Other"

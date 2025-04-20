@@ -72,4 +72,8 @@ The following settings can be configured to customize your experience:
 
 Initial release of LeetCode Problem Buddy, bringing automated driver code generation, custom test case support, and seamless integration for LeetCode problem solving.  
 
+## License
+
+This project is licensed under the Creative Commons Attribution-NonCommercial 4.0 International License. See the [LICENSE](LICENSE) file for details.
+
 ---
